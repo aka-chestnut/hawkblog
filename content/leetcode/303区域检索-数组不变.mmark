@@ -1,0 +1,57 @@
+---
+title: "303区域检索 数组不变"
+date: 2022-01-22T18:17:37+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-303区域检索 数组不变 刷题记录
+<!--more-->
+## 思路 A
+
+前缀和
+
+```python
+from collections import defaultdict
+class NumArray:
+
+    def __init__(self, nums: List[int]):
+        self.nums = nums 
+        self.pre_sum = defaultdict(int)
+        for idx,num in enumerate(nums):
+            if idx == 0:
+                self.pre_sum[0] = 0
+            else:
+                self.pre_sum[idx] += self.pre_sum[idx-1] + self.nums[idx-1]
+
+    def sumRange(self, left: int, right: int) -> int:
+        return self.pre_sum[right] - self.pre_sum[left] + self.nums[right]
+
+
+# Your NumArray object will be instantiated and called as such:
+# obj = NumArray(nums)
+# param_1 = obj.sumRange(left,right)
+```
+
+## 思路 B    
+
+优化前缀和，自己写的多少有点问题
+
+```python
+from collections import defaultdict
+class NumArray:
+
+    def __init__(self, nums: List[int]):
+        self.sums = [0,] 
+        for idx,num in enumerate(nums):
+            self.sums.append(num+self.sums[-1])
+
+    def sumRange(self, left: int, right: int) -> int:
+        return self.sums[right+1] - self.sums[left]
+
+
+# Your NumArray object will be instantiated and called as such:
+# obj = NumArray(nums)
+# param_1 = obj.sumRange(left,right)
+```

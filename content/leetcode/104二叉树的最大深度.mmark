@@ -1,0 +1,83 @@
+---
+title: "104二叉树的最大深度"
+date: 2022-01-22T18:30:47+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-104二叉树的最大深度 刷题记录
+<!--more-->
+## 思路 A
+
+DFS
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        res = []
+        def dfs(node,i):
+            if not node:
+                res.append(i)
+                return 
+            dfs(node.left,i+1)
+            dfs(node.right,i+1)
+        dfs(root,0)
+        return max(res) 
+```
+
+## 思路 B
+
+用一个更加清晰简单的递归
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        def dfs(node):
+            if not node:
+                return 0
+            return max(dfs(node.left)+1,dfs(node.right)+1)
+        return dfs(root)
+              
+```
+
+## 思路 C
+
+BFS算法
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 0
+        nodelist = [root,]
+        icnt = 0
+        while len(nodelist)> 0 :
+            icnt += 1
+            tmp = []
+            for nd in nodelist:
+                if not nd:
+                    continue
+                tmp.append(nd.left)
+                tmp.append(nd.right)
+            nodelist = tmp
+        return icnt - 1
+```

@@ -1,0 +1,44 @@
+---
+title: "287寻找重复数"
+date: 2022-01-22T18:25:00+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-287寻找重复数 刷题记录
+<!--more-->
+## 思路 A
+
+```python
+class Solution:
+    def findDuplicate(self, nums: List[int]) -> int:
+        mask = 0
+        for num in nums:
+            if mask & (1<<num) == (1<<num):
+                return num
+            mask |= (1<<num)
+```
+
+## 思路 B
+
+参考快慢指针
+
+总结快慢指针
+
+```python
+class Solution:
+    def findDuplicate(self, nums: List[int]) -> int:
+        slow,fast = 0,0
+        while True:
+            slow = nums[slow]
+            fast = nums[nums[fast]]
+            if slow == fast:
+                break
+        fast = 0
+        while True:
+            slow = nums[slow]
+            fast = nums[fast]
+            if slow == fast:
+                return slow
+```

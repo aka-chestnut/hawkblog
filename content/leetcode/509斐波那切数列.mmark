@@ -1,0 +1,87 @@
+---
+title: "509斐波那切数列"
+date: 2022-01-22T18:07:08+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-509斐波那切数列 刷题记录
+<!--more-->
+## 思路 A
+
+暴力递归
+
+```python
+class Solution:
+    def fib(self, n: int) -> int:
+        if n == 0:return 0
+        if n == 1:return 1
+        return self.fib(n-1)+self.fib(n-2)
+```
+
+## 思路 B    
+
+带 memo 的递归:可以降低一定的时间复杂度
+
+```python
+class Solution:
+    def fib(self, n: int) -> int:
+        memo = {i:0 for i in range(0,n+1)}
+
+        def help(memo,n):
+            if n == 0:
+                return 0
+            if n == 1:
+                return 1
+            if memo[n]>0: 
+                return memo[n]
+            memo[n] = help(memo,n-1)+help(memo,n-2) 
+            return memo[n]
+  
+        return help(memo,n)
+```
+
+## 思路 C
+
+memo 转正向迭代:从测试的时间上来看，显著降低了运行时间，理应与思路 B 的时间接近
+
+```python
+class Solution:
+    def fib(self, n: int) -> int:
+        if n == 0:
+            return 0
+        if n == 1:
+            return 1
+        resdict = {}
+        for i in range(0,n+1):
+            if i == 0:
+                resdict[i] = 0
+            elif i == 1:
+                resdict[i] = 1
+            else:
+                resdict[i] = resdict[i-1] + resdict[i-2]
+        return resdict[n]
+```
+
+## 思路 D
+
+["思路 C"](siyuan://blocks/20220106224600-jk26m93)的优化：状态压缩
+
+```python
+class Solution:
+    def fib(self, n: int) -> int:
+        if n == 0:
+            return 0
+        if n == 1:
+            return 1
+        prev,curr = 0,0
+        for i in range(0,n+1):
+            if i == 0:
+                pass
+            elif i == 1:
+                curr = 1
+            else:
+                curr,prev = prev+curr,curr
+        return curr
+```

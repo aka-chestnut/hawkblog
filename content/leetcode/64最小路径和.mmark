@@ -1,0 +1,74 @@
+---
+title: "64最小路径和"
+date: 2022-01-22T18:23:36+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-64最小路径和 刷题记录
+<!--more-->
+## 思路 A
+
+超时的思路，BFS：找一下答案看有没有用 BFS 的，对比一下
+
+* [ ] 如上，超时
+
+```python
+class Solution:
+	def minPathSum(self, grid: List[List[int]]) -> int:
+		# bfs
+		init = [(0,0,grid[0][0])]
+		result = []
+		def get_next_step(pl):
+			res = set()
+			for r,c,v in pl:
+				if (r==len(grid)-1) & (c==len(grid[0])-1):
+					result.append(v)
+					continue
+				if r < len(grid) - 1:
+					res.add((r+1,c,v+grid[r+1][c]))
+				if c < len(grid[0]) - 1:
+					res.add((r,c+1,v+grid[r][c+1]))
+			return res 
+			
+		while len(init)>0:
+			init = list(get_next_step(init))
+			
+		return min(result)
+```
+
+## 思路 B
+
+动态规划
+
+有几个地方需要注意：
+
+1. 注意边界时候不能朝某个方向走
+2. 注意判断最大值对于 dm 和 rm 的赋值
+
+```python
+class Solution:
+	def minPathSum(self, grid: List[List[int]]) -> int:
+		# 动态规划
+		
+		memo = {}
+		h = len(grid)
+		w = len(grid[0])
+		memo[(h-1,w-1)] = grid[h-1][w-1]
+		def get_best(row,col,now):
+			if (row,col) in memo.keys():
+				return memo[(row,col)]
+			else:
+				rm = inf
+				dm = inf
+				if col + 1 < w:
+					rm = now + get_best(row,col+1,grid[row][col+1])
+				if row + 1 < h:
+					dm = now + get_best(row+1,col,grid[row+1][col])
+				memo[(row,col)] = min(rm,dm)
+				return memo[(row,col)]
+				
+		return get_best(0,0,grid[0][0])
+		
+```

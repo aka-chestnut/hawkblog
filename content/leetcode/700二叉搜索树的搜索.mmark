@@ -1,0 +1,33 @@
+---
+title: "700二叉搜索树的搜索"
+date: 2022-01-22T18:11:02+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-700二叉搜索树的搜索 刷题记录
+<!--more-->
+## 思路 A
+
+根据搜索树的特性，遍历搜索
+
+注意：递归时一定要注意 return！！
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def searchBST(self, root: TreeNode, val: int) -> TreeNode:
+        if not root:return 
+        if root.val == val:
+            return root
+        if val>root.val:
+            return self.searchBST(root.right,val)
+        else:
+            return self.searchBST(root.left,val)
+```

@@ -1,0 +1,49 @@
+---
+title: "46全排列"
+date: 2022-01-22T18:10:18+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-46全排列 刷题记录
+<!--more-->
+## 思路 A
+
+回溯算法，用回溯的基本框架来搞定
+
+```python
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        result = []
+        def backtest(nowlist,reslist):
+            if len(reslist) == 0:
+                result.append(nowlist)
+                return 
+            for idx,item in enumerate(reslist):
+                reslist.pop(idx)
+                backtest(nowlist+[item,],reslist)
+                reslist.insert(idx,item)
+        backtest([],nums)
+        return result
+```
+
+## 思路 B
+
+发现思路 A 的回溯算法会有大量的数组插入和 pop 操作，这直接会导致程序耗时增加，因此考虑不再维护 reslist，而直接根据 nowlist 中的元素，判断是否需要跳过本次循环
+
+```python
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        result = []
+        def backtest(nowlist):
+            if len(nowlist) == len(nums):
+                result.append(nowlist)
+                return 
+            for item in nums:
+                if item in nowlist:
+                    continue
+                backtest(nowlist+[item,])
+        backtest([],)
+        return result
+```

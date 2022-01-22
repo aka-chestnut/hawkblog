@@ -1,0 +1,44 @@
+---
+title: "567字符串的排列"
+date: 2022-01-22T18:15:14+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-567字符串的排列 刷题记录
+<!--more-->
+思路 A
+
+滑动窗口思路，一定要注意这一题要求是子串
+
+```python
+from collections import defaultdict
+class Solution:
+    def checkInclusion(self, s1: str, s2: str) -> bool:
+        valid = 0
+        left,right = 0,0
+        need = defaultdict(int)
+        window = defaultdict(int)
+        for c in s1:
+            need[c] += 1
+        needvalid = len(need)
+        while right < len(s2):
+            if need[s2[right]] > 0:
+                window[s2[right]] += 1
+                if need[s2[right]] == window[s2[right]]:
+                    valid += 1
+            right += 1
+            while valid == needvalid:
+                if right - left == len(s1):
+                    return True
+                tmpc = s2[left]
+                if need[tmpc] > 0:
+                    if need[tmpc] == window[tmpc]:
+                        valid -=1
+                    window[tmpc] -= 1
+
+                left += 1
+
+        return False  
+```

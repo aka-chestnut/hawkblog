@@ -1,0 +1,31 @@
+---
+title: "1265逆序打印链表"
+date: 2022-01-22T18:27:50+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-1265逆序打印链表 刷题记录
+<!--more-->
+## 思路 A
+
+直接递归
+
+```python
+# """
+# This is the ImmutableListNode's API interface.
+# You should not implement it, or speculate about its implementation.
+# """
+# class ImmutableListNode:
+#     def printValue(self) -> None: # print the value of this node.
+#     def getNext(self) -> 'ImmutableListNode': # return the next node.
+
+class Solution:
+    def printLinkedListInReverse(self, head: 'ImmutableListNode') -> None:
+        if not head.getNext():
+            head.printValue()
+            return 
+        self.printLinkedListInReverse(head.getNext())
+        head.printValue()
+```

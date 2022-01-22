@@ -1,0 +1,68 @@
+---
+title: "51N皇后"
+date: 2022-01-22T18:11:57+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-51N皇后 刷题记录
+<!--more-->
+## 思路 A
+
+改写的回溯算法
+
+目前为止写过最长的题目了，写完了没有心情学新的思路了，这个暂且先放一放
+
+* [ ] 复习 + 写新的思路
+
+```python
+class Solution:
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        res = []
+
+        def checkvalid(queen,row,col):
+            # check col 
+            icnt = 0
+            for i in range(n):
+                if queen[i][col] == 'Q':
+                    icnt += 1
+                    if icnt > 1:
+                        return False
+            # check right down
+            for i in range(1,n):
+                if (row+i<=n-1) & (col+i<=n-1):
+                    if queen[row+i][col+i] == 'Q':
+                        return False
+                if (row-i>=0) & (col-i>=0):
+                    if queen[row-i][col-i] == 'Q':
+                        return False
+
+            # check right up 
+            for i in range(1,n):
+                if (row-i>=0) & (col+i<=n-1):
+                    if queen[row-i][col+i] == 'Q':
+                        return False 
+                if (col-i>=0) & (row+i<=n-1):
+                    if queen[row+i][col-i] == 'Q':
+                        return False 
+        
+            return True
+            
+
+        def backtest(row,nowqueen):
+            if row == n:
+                res.append(nowqueen.copy())
+                return 
+            for col in range(0,n):
+                tmp = ['.']*n
+                tmp[col] = 'Q'
+                nowqueen[row] = ''.join(tmp)
+                if checkvalid(nowqueen,row,col):
+                    backtest(row+1,nowqueen)
+                nowqueen[row] = '.'*n
+
+        
+        backtest(0,['.'*n]*n)
+        return res
+```

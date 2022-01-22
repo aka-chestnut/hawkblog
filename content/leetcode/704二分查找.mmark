@@ -1,0 +1,33 @@
+---
+title: "704二分查找"
+date: 2022-01-22T18:13:44+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-704二分查找 刷题记录
+<!--more-->
+## 思路 A
+
+最基础的二分查找模版：
+
+有几个地方需要注意：
+
+1. mid 计算时，python 要手动转成整型
+2. 注意更新边界时的 +-1
+
+```python
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        left = 0
+        right = len(nums) - 1
+        while(left<=right):
+            mid = left + int ((right-left) / 2)
+            if nums[mid] == target:return mid 
+            if target>nums[mid]:
+                left = mid+1 
+            elif target<nums[mid]:
+                right = mid-1 
+        return -1
+```

@@ -1,0 +1,28 @@
+---
+title: "238除以自身以外数组的乘积"
+date: 2022-01-22T18:05:25+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-238除以自身以外数组的乘积 刷题记录
+<!--more-->
+## 思路 A
+
+维护一个左乘表和右乘表
+
+```python
+from functools import reduce
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        left,right = [1]*len(nums),[1]*len(nums)
+        for i in range(len(nums)):
+            if i == 0:
+                left[0] = 1
+                right[-1] = 1
+            else:
+                left[i] = left[i-1]*nums[i-1]
+                right[-i-1] = right[-i]*nums[-i]
+        return [x*y for x,y in zip(left,right)]
+```

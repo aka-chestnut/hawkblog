@@ -1,0 +1,54 @@
+---
+title: "48旋转图像"
+date: 2022-01-22T17:52:33+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-48旋转图像 刷题记录
+<!--more-->
+[旋转图像](https://leetcode-cn.com/problems/rotate-image/solution/xuan-zhuan-tu-xiang-by-leetcode-solution-vu3m/)
+
+## 思路 A
+
+思路很简单，原地交换就通过多次变换达到目的，那么最简单想到的思路就是分两步完成 90 度旋转矩阵的操作：
+
+1. 对称
+2. 翻转
+
+```python
+class Solution:
+    def rotate(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        """
+        for i in range(0,len(matrix)):
+            for j in range(0,i):
+                matrix[i][j],matrix[j][i] = matrix[j][i],matrix[i][j]
+
+        for i in range(0,len(matrix)):
+            for j in range(0,int(len(matrix)/2)):
+                matrix[i][j],matrix[i][len(matrix)-1-j] = matrix[i][len(matrix)-1-j],matrix[i][j]
+```
+
+因为整体思路比较简单，其他类似的题目也可以按部就班的按此套路解答，所以不再另写第二种解法
+
+## 补充
+
+1. 转置
+
+    ```python
+    for i in range(0,len(matrix)):
+        for j in range(0,i):
+            matrix[i][j],matrix[j][i] = matrix[j][i],matrix[i][j]
+    ```
+
+2. 斜对称
+
+    ```python
+    for i in range(0,len(matrix)):
+        for j in range(i,len(matrix)-1):
+            matrix[i][j],matrix[len(matrix)-1-j][len(matrix)-1-i] = matrix[len(matrix)-1-j][len(matrix)-1-i],matrix[i][j]
+    print(matrix)
+    ```

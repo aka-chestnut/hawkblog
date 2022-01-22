@@ -1,0 +1,29 @@
+---
+title: "354俄罗斯套娃信封问题"
+date: 2022-01-22T18:28:43+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-354俄罗斯套娃信封问题 刷题记录
+<!--more-->
+## 思路 A
+
+```python
+class Solution:
+    def maxEnvelopes(self, envelopes: List[List[int]]) -> int:
+        res = []
+        envelopes = sorted(envelopes,key=lambda x:(x[0],-x[1]))
+        for env in envelopes:
+            if (len(res) == 0) or (res[-1]<env[1]):
+                res.append(env[1])
+            else:
+                for idx,tmp in enumerate(res):
+              
+                    if tmp>=env[1]:
+                        res[idx] = env[1]
+                        break
+            print(res)
+        return len(res)
+```

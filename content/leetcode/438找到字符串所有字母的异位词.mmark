@@ -1,0 +1,57 @@
+---
+title: "438找到字符串所有字母的异位词"
+date: 2022-01-22T18:16:16+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-438找到字符串所有字母的异位词 刷题记录
+<!--more-->
+## 思路 A
+
+还是滑动窗口的思想
+
+一定要注意 ！！！ 滑动窗口模版的上下对称（指左右判断是否 valid 那块）
+
+```python
+from collections import defaultdict
+class Solution:
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        ## ？一个定长的滑动窗口
+        res = []
+        left,right = 0,0
+        need = defaultdict(int)
+        window = defaultdict(int) 
+        for c in p:
+            need[c] += 1
+        need_valid = len(need)
+        valid = 0
+        while right < len(s):
+            if need[s[right]] > 0:
+                window[s[right]] += 1
+                if window[s[right]] == need[s[right]]:
+                    valid += 1
+            right += 1
+            while right - left > len(p):
+                tmpc = s[left]
+                if need[tmpc]>0:
+                    if window[tmpc] == need[tmpc]:
+                        valid -= 1
+                    window[tmpc] -= 1
+                left += 1
+            if right - left == len(p):
+                if valid == need_valid:
+                    res.append(left)
+        return res
+```
+
+有一个地方有坑：
+
+![image.png](https://b3logfile.com/siyuan/1617901637880/assets/image-20220108175802-comezoz.png)
+
+注意到整个滑动窗口的框架上下是对称的，上面用 `==` 判断，下面就一定也要用 `==` 判断，否则会出现多次对 valid改动的情况
+
+这里起初的写法错误，导致多次对 valid 重复操作，从而让滑动窗口无法达到判定条件
+
+（原写法，把 window 计数器的自减写在了上面，用 `<` 判断了 window 和 need 两个计数器对于 tmpc 的大小限制。这就会导致，连续的 `<` 会让 valid 对于同一种情况重复的 `-`

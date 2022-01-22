@@ -1,0 +1,39 @@
+---
+title: "142环形链表II"
+date: 2022-01-22T18:27:22+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-142环形链表II 刷题记录
+<!--more-->
+## 思路 A
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def detectCycle(self, head: ListNode) -> ListNode:
+        if not head:
+            return
+        fast,slow = head,head 
+        while True:
+            if (not fast.next) or (not fast.next.next):
+                return 
+            fast = fast.next.next
+            slow = slow.next 
+            if fast == slow:
+                break 
+  
+        slow = head 
+        while True:
+            if slow == fast:
+                return slow
+            slow = slow.next 
+            fast = fast.next 
+```

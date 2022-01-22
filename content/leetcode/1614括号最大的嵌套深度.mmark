@@ -1,0 +1,27 @@
+---
+title: "1614括号最大的嵌套深度"
+date: 2022-01-22T18:11:29+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-1614括号最大的嵌套深度 刷题记录
+<!--more-->
+## 思路 A
+
+思路很简单，遇到左括号 +1，遇到右括号-1，维护一个当前数值和一个最大数值，最终返回最大
+
+```python
+class Solution:
+    def maxDepth(self, s: str) -> int:
+        tmp = 0
+        res = 0
+        for this in s:
+            if this == '(':
+                tmp += 1
+                res = max(res,tmp)
+            if this == ')':
+                tmp -=1
+        return res
+```

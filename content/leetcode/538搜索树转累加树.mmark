@@ -1,0 +1,30 @@
+---
+title: "538搜索树转累加树"
+date: 2022-01-22T17:55:19+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-538搜索树转累加树 刷题记录
+<!--more-->
+## 思路 A
+
+```python
+class Solution:
+    def __init__(self):
+        self.now = None  
+
+    def convertBST(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        if not root:
+            return root
+        if root.right:
+            self.convertBST(root.right)
+        if not self.now:
+            self.now = root.val
+        else:
+            root.val = self.now + root.val
+        self.now = root.val
+        if root.left:
+            self.convertBST(root.left)
+```

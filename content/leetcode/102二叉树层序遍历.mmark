@@ -1,0 +1,28 @@
+---
+title: "102二叉树层序遍历"
+date: 2022-01-22T17:55:50+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-102二叉树层序遍历 刷题记录
+<!--more-->
+## 思路 A
+
+```python
+class Solution:
+    def levelOrder(self, root: TreeNode) -> List[List[int]]:
+        res = []
+        depth = 0
+        def getnext(root,depth):
+            if not root:
+                return
+            if len(res)==depth:
+                res.append([])
+            res[depth].append(root.val)
+            getnext(root.left,depth+1)
+            getnext(root.right,depth+1)
+        getnext(root,depth)
+        return res
+```

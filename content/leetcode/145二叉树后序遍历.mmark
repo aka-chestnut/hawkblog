@@ -1,0 +1,35 @@
+---
+title: "145二叉树后序遍历"
+date: 2022-01-22T17:56:32+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-145二叉树后序遍历 刷题记录
+<!--more-->
+## 思路 A
+
+递归
+
+```python
+class Solution:
+    def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        res = []
+        def getnext(root):
+            if not root:
+                return 
+            getnext(root.left)
+            getnext(root.right)
+            res.append(root.val)
+        getnext(root)
+        return res
+```
+
+## 思路 2
+
+迭代
+
+## 思路 3
+
+翻转

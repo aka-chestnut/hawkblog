@@ -1,0 +1,36 @@
+---
+title: "3无重复字符的最长子串"
+date: 2022-01-22T18:16:43+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-3无重复字符的最长子串 刷题记录
+<!--more-->
+## 思路 A
+
+```python
+from collections import defaultdict
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        left,right = 0,0
+        valid = 1
+        maxlen = 0
+        window = defaultdict(int)
+        while right < len(s):
+            window[s[right]] += 1
+            if window[s[right]] == 2:
+                valid = 0
+            right += 1
+
+            while valid == 0:
+                window[s[left]] -= 1         
+                left += 1
+                if max(window.values()) == 1:
+                    valid = 1
+            maxlen = max(maxlen,right-left)
+        return maxlen
+```
+
+* [ ] 一定要注意 maxlen 每次判定所处的位置

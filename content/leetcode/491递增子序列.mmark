@@ -1,0 +1,50 @@
+---
+title: "491递增子序列"
+date: 2022-01-22T18:17:14+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-491递增子序列 刷题记录
+<!--more-->
+## 思路 A
+
+动态规划
+
+```python
+class Solution:
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+
+        res_set = {(nums[0],)}
+
+        for num in nums[1:]:
+            res_set.update({tmp + (num,) for tmp in res_set if num>=tmp[-1]})
+            res_set.add((num,))
+    
+        return [list(c) for c in res_set if len(c)>1]
+```
+
+## 思路 B
+
+DFS
+
+```python
+class Solution:
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        res = []
+
+        def dfs(nums,temp):
+            if len(temp)> 1:
+                res.append(temp)
+            hs = set()
+            for i in range(len(nums)):
+                if nums[i] in hs:
+                    continue
+                if len(temp) == 0 or temp[-1] <= nums[i]:
+                    hs.add(nums[i])
+                    dfs(nums[i+1:],temp+[nums[i],])
+
+        dfs(nums,[])
+        return res
+```

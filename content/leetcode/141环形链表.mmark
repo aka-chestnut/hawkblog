@@ -1,0 +1,37 @@
+---
+title: "141环形链表"
+date: 2022-01-22T18:25:47+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-141环形链表 刷题记录
+<!--more-->
+## 思路 A
+
+常规思路，快慢指针
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        if not head:
+            return False
+        fast,slow = head,head 
+        while fast.next and fast.next.next:
+            slow = slow.next 
+            fast = fast.next.next 
+            if slow == fast:
+                return True
+        return False
+```
+
+## 思路 B
+
+* [ ] 看题解再写一个

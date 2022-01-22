@@ -1,0 +1,85 @@
+---
+title: "76最小覆盖子串"
+date: 2022-01-22T18:14:10+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-76最小覆盖子串 刷题记录
+<!--more-->
+## 思路 A
+
+超时版本
+
+```python
+from collections import defaultdict
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+
+        need = defaultdict(int)
+        def check_valid(window):
+            for c,v in need.items():
+                if window.count(c) <v:
+                    return False 
+            return True
+
+        for c in t:
+            need[c] += 1
+        left,right = 0,0
+        window = []
+        len_min = len(s)+1
+        win_min = ''
+        while right < len(s):
+            window.append(s[right])
+            right = right +1
+            if check_valid(window):
+                while check_valid(window):
+                    if len(window)<len_min:
+                        win_min = list(window) 
+                        len_min = len(window)
+                    left = left + 1
+                    window.pop(0)
+        
+  
+        return ''.join(win_min)
+```
+
+自己写的滑动窗口，无奈卡在最后一个 case 爆时间，初步分析下可能是 check_valid 函数用时过长
+
+把 window 也改成了哈希表，比之前超时的版本聪明了几百倍
+
+```python
+from collections import defaultdict
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+
+        need = defaultdict(int)
+        window = defaultdict(int)
+
+        def check_valid(window):
+            for c,v in need.items():
+                if window[c] <v:
+                    return False 
+            return True
+
+        for c in t:
+            need[c] += 1
+
+        left,right = 0,0
+        len_min = len(s)+1
+        win_min = ''
+
+        while right < len(s):
+            window[s[right]] += 1
+            right = right +1
+            while check_valid(window):
+                if right-left<len_min:
+                    win_min = s[left:right]
+                    len_min = right - left
+                window[s[left]] -= 1
+                left = left + 1
+        
+  
+        return win_min
+```
