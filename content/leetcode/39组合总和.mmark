@@ -1,0 +1,60 @@
+---
+title: "39组合总和"
+date: 2022-01-22T17:10:02+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-39组合总和 刷题记录
+<--more--!>
+[组合总和](https://leetcode-cn.com/problems/combination-sum/)
+
+## 思路 A
+
+题目一看想到的思路就是回溯方法，但是因为组合中有重复，所以会有一步去重操作；
+
+最后性能分析上不是特别好，原因应该就在于排序
+
+```python
+class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        res = []
+        def backtest(target_,candidates_,tmp_):
+            if target_ in candidates_:
+                tmpres = tmp_ + [target_]
+                tmpres = sorted(tmpres)
+                if tmpres not in res:
+                    res.append(tmpres)
+            for c in candidates_:
+                if target_ - c>0:
+                    tmp_.append(c)
+                    backtest(target_-c,candidates,tmp_)
+                    tmp_.pop()
+        backtest(target,candidates,[])
+        return res
+```
+
+## 思路 B
+
+思路 A 速度比较慢的另一个原因就是没有剪枝，此处提供了另外一种思路，不需要每一步判断剪枝，而是一开始就对数组进行排序，然后在每一次循环中，不再对重复的数字进行计算。
+
+```python
+class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        res = [
+        ]
+        candidates = sorted(candidates)
+        def getnext(idx,target,tmp):
+            for i in range(idx,len(candidates)):
+                c = candidates[i]
+                tmp = tmp.copy()
+                if c == target:
+                    res.append(tmp+[c,])
+                if c < target:
+                    getnext(i,target-c,tmp+[c,])
+                if c > target:
+                    break
+        getnext(0,target,[])
+        return res
+```

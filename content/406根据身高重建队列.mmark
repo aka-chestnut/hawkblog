@@ -1,0 +1,47 @@
+---
+title: "406根据身高重建队列"
+date: 2022-01-22T17:11:30+08:00
+hidehome: true
+draft: false
+tags: ["LeetCode"]
+categories: "LeetCode"
+---
+LeetCode-406根据身高重建队列 刷题记录
+<--more--!>
+​[根据身高重建队列](https://leetcode-cn.com/problems/queue-reconstruction-by-height/)
+
+## 思路 A
+
+自己写的，和标答有着明显的差距，主要有两点缺陷
+
+1. `insert` 函数有标准库函数，自己又造了一遍轮子
+2. 先把整个完整列表构造了一遍，然后遍历插入，明显浪费了时间
+
+```python
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        def insert(l,site_ori,site_new):
+            f = l.pop(site_ori)
+            return l[:site_new] +[f,] + l[site_new:]
+        people = sorted(people,key=lambda x:(-x[0],x[1]))
+        isig = -1
+        icnt = 0
+        for i in range(len(people)):
+            if i>0:
+                people = insert(people,i,people[i][1])
+
+        return people
+```
+
+## 思路 B
+
+标答，很简洁
+
+```python
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        ans = []
+        for k,v in sorted(people,key=(lambda x:(-x[0],x[1]))):
+            ans.insert(v,[k,v])
+        return ans
+```

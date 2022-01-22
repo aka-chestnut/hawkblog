@@ -1,11 +1,10 @@
 ---
 title: "{{ replace .Name "-" " " | title }}"
 date: {{ .Date }}
-hidehome: false
+hidehome: true
 draft: false
-tags: [""]
-categories: ""
-series: ""
+tags: ["LeetCode"]
+categories: "LeetCode"
 ---
 
 <--more--!>
