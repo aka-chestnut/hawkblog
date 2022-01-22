@@ -1,6 +1,5 @@
-baseURL: "http://www.aihawk.tech"
 title: Ai-Hawk
-paginate: 10
+paginate: 5
 theme: PaperMod
 languageCode: zh
 defaultContentLanguage: zh
