@@ -1,4 +1,3 @@
-baseURL: "http://example.org/"
 canonifyurls: true
 title: Ai-Hawk
 paginate: 5
