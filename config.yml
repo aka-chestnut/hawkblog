@@ -1,4 +1,4 @@
-baseURL: /
+baseURL: "http://example.org/blog"
 relativeURLs: true
 title: Ai-Hawk
 paginate: 5
