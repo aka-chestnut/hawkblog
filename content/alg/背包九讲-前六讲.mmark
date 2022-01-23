@@ -9,5 +9,5 @@ series: ["背包问题"]
 ---
 记录了背包九讲：前六讲的笔记。
 <!--more-->
-{{< embed-pdf url="./alg/bag6.pdf" >}}
+{{< embed-pdf url="/alg/bag6.pdf" >}}
 
