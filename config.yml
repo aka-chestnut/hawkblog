@@ -1,5 +1,5 @@
-baseURL: "http://example.org/blog"
-relativeURLs: true
+baseURL: "http://example.org/"
+canonifyurls: true
 title: Ai-Hawk
 paginate: 5
 theme: PaperMod
