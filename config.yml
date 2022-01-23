@@ -1,4 +1,4 @@
-canonifyurls: true
+baseURL: 'http://www.aihawk.com'
 title: Ai-Hawk
 paginate: 5
 theme: PaperMod
