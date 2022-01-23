@@ -130,10 +130,14 @@ menu:
       name: LeetCode
       url: /leetcode/
       weight: 40
+    - identifier: alg
+      name: 算法
+      url: /alg/
+      weight: 40
     - identifier: search
       name: 搜索
       url: /search/
-      weight: 30
+      weight: 60
 outputs:
     home:
         - HTML
