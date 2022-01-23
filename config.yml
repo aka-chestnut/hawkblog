@@ -1,4 +1,5 @@
-baseURL: "~"
+baseURL: "/"
+relativeURLs: true
 title: Ai-Hawk
 paginate: 5
 theme: PaperMod
