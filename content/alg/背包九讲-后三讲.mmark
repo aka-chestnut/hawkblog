@@ -1,0 +1,13 @@
+---
+title: "背包九讲 后三讲"
+date: 2022-01-26T00:39:06+08:00
+hidehome: false
+draft: false
+tags: ["算法","LeetCode"]
+categories: "算法"
+series: ["背包问题"]
+---
+记录了背包九讲：后三讲的笔记。
+<!--more-->
+{{< embed-pdf url="/alg/bag3.pdf" >}}
+
