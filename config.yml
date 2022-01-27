@@ -1,5 +1,5 @@
 baseURL: "http://www.aihawk.tech"
-title: Ai-Hawk
+title: Hawk的一方净土
 paginate: 5
 theme: PaperMod
 languageCode: zh
@@ -25,7 +25,7 @@ taxonomies:
   category: "categories"
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
-  title: ai-Hawk
+  title: Hawk的一方净土
   description: "喜欢就买 不行就分 多喝热水 重启试试"
   keywords: [风控算法,机器学习,编程]
   author: Hawk
