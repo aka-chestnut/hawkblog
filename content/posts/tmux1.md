@@ -3,9 +3,9 @@ title: "Tmux基础操作"
 date: 2022-01-28T01:14:38+08:00
 hidehome: false
 draft: false
-tags: ["Linux","Tmux"]
+tags: ["Linux"]
 categories: "Linux"
-series: ["Linux基础操作"]
+series: ["Linux"]
 ---
 本文记录了Tmux相关的基础操作，够用。
 <!--more-->

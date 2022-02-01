@@ -5,10 +5,11 @@ hidehome: false
 draft: false
 tags: ["Linux"]
 categories: "Linux"
-series: ["Linux基础操作"]
+series: ["Linux"]
 ---
-本篇记录了Linux-Shell脚本编程相关的知识
+本篇记录了Linux-Shell脚本编程相关的知识。
 <!--more-->
+
 ## 一、注释
 
 1. 单行注释
