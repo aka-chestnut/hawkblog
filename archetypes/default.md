@@ -5,7 +5,7 @@ hidehome: false
 draft: false
 tags: [""]
 categories: ""
-series: ""
+series: [""]
 ---
 
 <!--more-->
