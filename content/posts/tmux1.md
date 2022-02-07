@@ -1,5 +1,5 @@
 ---
-title: "Tmux基础操作"
+title: "Linux笔记-Tmux基础操作"
 date: 2022-01-28T01:14:38+08:00
 hidehome: false
 draft: false

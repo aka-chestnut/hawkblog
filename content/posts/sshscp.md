@@ -1,5 +1,5 @@
 ---
-title: "ssh与scp命令"
+title: "Linux笔记-ssh与scp命令"
 date: 2022-02-02T21:59:19+08:00
 hidehome: false
 draft: false

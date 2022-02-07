@@ -1,5 +1,5 @@
 ---
-title: "Shell编程"
+title: "Linux笔记-Shell编程"
 date: 2022-02-01T00:52:32+08:00
 hidehome: false
 draft: false
