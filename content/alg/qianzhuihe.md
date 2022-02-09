@@ -168,5 +168,5 @@ int main()
 ```
 
 ## 笔记
-{{< embed-pdf url="/alg/基础算法3 差分与前缀和.pdf" >}}
+{{< embed-pdf url="/alg/基础算法3 差分前缀和.pdf" >}}
 
