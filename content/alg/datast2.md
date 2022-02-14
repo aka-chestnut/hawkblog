@@ -1,5 +1,5 @@
 ---
-title: "Datast2"
+title: "数据结构2——字典树、并查集与堆"
 date: 2022-02-14T20:47:38+08:00
 hidehome: false
 draft: false
