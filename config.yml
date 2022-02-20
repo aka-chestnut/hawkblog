@@ -19,6 +19,7 @@ permalinks:
   leetcode: /:sections/:year/:month/:filename/
   posts: /:sections/:year/:month/:filename/
   riskmodel: /:sections/:year/:month/:filename/
+  ml: /:sections/:year/:month/:filename/
 taxonomies:
   series: "series"
   tag: "tags"
@@ -130,6 +131,10 @@ menu:
     - identifier: leetcode
       name: LeetCode
       url: /leetcode/
+      weight: 40
+    - identifier: ml
+      name: 机器学习
+      url: /ml/
       weight: 40
     - identifier: alg
       name: 算法
