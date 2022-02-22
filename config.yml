@@ -20,6 +20,7 @@ permalinks:
   posts: /:sections/:year/:month/:filename/
   riskmodel: /:sections/:year/:month/:filename/
   ml: /:sections/:year/:month/:filename/
+  ind: /:sections/:year/:month/:filename/
 taxonomies:
   series: "series"
   tag: "tags"
@@ -139,6 +140,10 @@ menu:
     - identifier: alg
       name: 算法
       url: /alg/
+      weight: 40
+    - identifier: ind
+      name: 行业研究
+      url: /ind/
       weight: 40
     - identifier: search
       name: 搜索
