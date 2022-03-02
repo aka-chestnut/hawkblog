@@ -21,6 +21,8 @@ permalinks:
   riskmodel: /:sections/:year/:month/:filename/
   ml: /:sections/:year/:month/:filename/
   ind: /:sections/:year/:month/:filename/
+  front: /:sections/:year/:month/:filename/
+  quant: /:sections/:year/:month/:filename/
 taxonomies:
   series: "series"
   tag: "tags"
@@ -144,6 +146,10 @@ menu:
     - identifier: ind
       name: 行业研究
       url: /ind/
+      weight: 40
+    - identifier: quant
+      name: 量化
+      url: /quant/
       weight: 40
     - identifier: search
       name: 搜索
