@@ -1,0 +1,534 @@
+---
+title: "【风控算法】模型训练营笔记"
+date: 2021-12-19
+hidehome: false
+draft: false
+tags: ["风控","算法"]
+series: ["风控算法课程笔记"]
+categories: "风控算法"
+---
+不知道是哪一年的课程，风控算法相关，记录听课过程中的一些笔记
+<!--more-->
+## 一、预览
+
+1. 聚合函数进阶
+
+    ```sql
+    select province,city,district,sum(gmv)
+    from table
+    group by grouping sets(province,city,district);
+
+    -- total 
+    select province,city,district,sum(gmv)
+    from table 
+    group by grouping sets(province,city,district,());
+
+    select province,city,district,sum(gmv)
+    from table
+    group by rollup(province,city,district);
+    ```
+2. 子查询嵌套
+
+    ```sql
+    select shop_id from table1 where gmv > any(select gmv from table2);
+    select shop_id from table1 where gmv > all(select gmv from table2);`
+    ```
+3. 常用名词
+
+    |名词|解释|
+    | -------------| ----------------------------------|
+    |DPD|Day past due|
+    |FPD|First time past due|
+    |F/S/T/QPD|首次、二次、三次、四次逾期天数|
+    |M1|逾期[1,30]|
+    |M1+|逾期(30,inf)|
+    |default|坏账|
+    |delinquency|拖欠|
+    |flow rate|流动率（M1向M2，M2向M3转移比率）|
+    |bad rate|坏账率|
+    |vintage|账龄分析|
+
+## 二、风控建模实例
+
+### 第一部分：信贷业务概述
+
+1. 信贷产品
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324185718-p7jipmj.png)
+2. 信用卡分类
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324190534-zs6i6sz.png)
+3. pos机套现
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324193207-01up8hr.png)
+4. 体系内部造数据
+
+    1. 制作数据申请借呗
+
+        * 使用花呗在天猫购物，对花呗账单做分期
+        * 买入存金宝，一个礼拜后追加存金宝资金
+        * 购买500元基金
+        * 保持余额宝4000元不动
+        * 购买意外旅游险
+        * 余额宝累计收益做到50元
+    2. 制作数据申请微粒贷
+
+        * 财付通实名注册，验证手机，绑定QQ，提供收货地址，充话费
+        * 实名注册QQ钱包，绑定银行卡，在美丽说或京东消费
+        * 下载微众银行，实名，购买理财
+        * 微信实名，做一个礼拜的QQ，微信，财付通的转账流水
+    3. 溢缴款AB卡提额  
+        AB两张卡共享5000元额度  
+        1还清消费，保证A卡可用额度为5000  
+        2存入A卡45000元  
+        3 挂失A卡  
+        4 B卡刷掉5000元所有额度  
+        5 B卡固定额度变成5万
+5. 风控模型框架
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324195335-ik32zrv.png)
+
+### 第二部分：抄几个函数
+
+1. 两个函数
+
+    ```python
+    def plot_roc(ytrue, yprob):
+        fpr, tpr, thresholds = roc_curve(ytrue, yprob, pos_label=1)
+        auc_score = auc(fpr, tpr)
+        w = tpr - fpr
+        ks_score = w.max()
+        ks_x = fpr[w.argmax()]
+        ks_y = tpr[w.argmax()]
+        fig, ax = plt.subplots()
+        ax.plot(fpr, tpr, label='AUC=%.5f' % auc_score)
+        ax.set_title('Receiver Operating Characteristic')
+        ax.plot([0, 1], [0, 1], '--', color=(0.6, 0.6, 0.6))
+        ax.plot([ks_x, ks_x], [ks_x, ks_y], '--', color='red')
+        ax.text(ks_x, (ks_x + ks_y) / 2, '  KS=%.5f' % ks_score)
+        ax.legend()
+        fig.show()
+
+    def plot_ks(ytrue, yprob):
+        fpr, tpr, thresholds = roc_curve(ytrue, yprob, pos_label=1)
+        w = tpr - fpr
+        thresholds[0] -= 1
+      
+        df = pd.DataFrame({'ytrue': test['TARGET'], 'yscore': yprob})
+
+        c0 = len(df[df['ytrue']==0])
+        c1 = len(df[df['ytrue']==1])
+        cnt_good = [len(df[(df['yscore'] < thr) & (df['ytrue']==0)])/c0 for thr in thresholds]
+        cnt_bad = [len(df[(df['yscore'] < thr) & (df['ytrue']==1)])/c1 for thr in thresholds]
+
+        plt.plot(thresholds, w, '-b', label='ks')
+        plt.plot(thresholds, cnt_good, '-g', label='good')
+        plt.plot(thresholds, cnt_bad, '-r', label='bad')
+
+        plt.show()
+
+    from scikitplot.metrics import plot_ks_statistic, plot_lift_curve
+    from scikitplot.helpers import binary_ks_curve
+    ```
+2. scikitplot
+
+    [机器学习作图库](https://github.com/reiinakano/scikit-plot)
+
+## 三、特征构造
+
+1. 建模整体流程
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324204828-9ylma3s.png)
+2. 客户分群的维度
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324205134-ury4c6h.png)
+3. 特征分类
+
+    1. [用户KYC数据](https://zhuanlan.zhihu.com/p/355673088)
+    2. App行为数据
+    3. 外部三方数据
+    4. 用户授权数据
+    5. 设备采集数据
+    6. 内部自有数据
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324205857-mpf6wxn.png)![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324210242-gdejjrd.png)
+4. 特征构建前需要做的三件事
+
+    1. 明确数据源对应的具体数据表，画出类ER图
+    2. 明确评估特征的样本集
+    3. 指定特征框架，确保对数据使用维度进行了全面思考
+5. 特征构建框架
+
+    RFM框架+补充 参考资料：[RFM-Model](https://baijiahao.baidu.com/s?id=1655579544683635287&wfr=spider&for=pc)
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324211621-a0xdlmx.png)
+6. 特征构建具体方法
+
+    1. 用户静态信息特征：姓名、性别、年龄
+    2. 用户时间截面信息：截面时间点银行存款额、截面时间点最大逾期天数
+    3. 用户时间序列特征：过去六个月GPS省份数量、过去一年逾期记录
+7. 特征报告与模型报告
+
+    1. 特征报告内容  
+        1特征项目需求  
+        2特征项目任务列表  
+        3特征项目时间表  
+        4类ER图  
+        5样本设计  
+        6特征框架  
+        7 每周开发进度和结果  
+        8每周讨论反馈和改进意见笔记  
+        9特征项目交付说明  
+        10特征项目总结‘
+    2. 模型报告  
+        1模型项目需求  
+        2模型项目任务列表  
+        3模型项目时间表  
+        4模型设计  
+        5样本设计  
+        6模型训练流程和实验设计  
+        7每周开发进度和结果  
+        8 每周讨论反馈和改进意见笔记  
+        9模型项目交付说明  
+        10模型项目总结
+8. 模型监控框架
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220324212818-wivrmsn.png)
+9. 特征编码对比
+
+    ![38FD7C76-BECA-4148-8689-742E6EAA680A_1_105_c.jpeg](https://assets.b3logfile.com/siyuan/1617901637880/assets/38FD7C76-BECA-4148-8689-742E6EAA680A_1_105_c-20220325101628-yzwzaky.jpeg)
+10. 特征流转过程
+
+     ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325101718-d5wl39i.png)
+
+## 四、特征评估与选择
+
+1. IV与KL之间的联系
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325101804-ukebh1i.png)
+2. 用星座特征进行特征筛选方法
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325101819-o01to3l.png)
+3. Boruta特征筛选（星座特征的进阶与扩展）
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325101836-mev3xy8.png)
+4. 公司/业务不同阶段，模型的构建流程
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325101852-1olf1tx.png)
+5. 客户还款状态细分
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325101909-xvw76g1.png)
+
+    不同阶段的模型： 
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325101949-8pxedzp.png)
+6. AUC
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325111854-s2sepb4.png)
+
+    AUC计算一个直观的例子
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325112255-ylunyg4.png)
+7. AUC与基尼系数
+
+    GINI=2AUC-1
+
+## 五、模型构建                                                                                                                                                                                   
+
+1. 线性回归推导
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220325145253-rd311c6.png)
+2. 逻辑回归
+
+    $ln \frac{y}{1-y} = w^Tx+b+\varepsilon \\结合woe \ encoding \\woe=ln \frac{p_{good}}{p_{bad}}=-ln\frac{p_{bad}}{1-p_{bad}} \\ln \frac{y}{1-y} = -w^T * woe+b+\varepsilon $  
+
+    即逻辑回归：
+
+    把特征的坏率值线性加权，作为预测的坏率值
+3. 正则项
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220326212932-t7nzp7u.png)
+4. 贝叶斯优化
+
+    1. 假设前提：
+
+        1. 目标函数的参数空间是一个compact domain（有上下限）
+        2. 目标函数本身满足L-Lipschitz continuity（函数表面光滑有弹性，最大导数绝对值<=L)
+        3. 优化算法尝试次数无穷大(能够无限次进行训练）
+    2. 调优
+
+        > 首先随机初始化一定数量的参数集合
+        >
+        > 使用这些参数集合进行模型训练，得到模型表现
+        >
+        > 把模型表现当作输入使用高斯过程进行拟合
+        >
+        > for t in range(0,t)
+        >
+        >     从拟合的高斯函数中按一定的标准取下一个参数集合
+        >
+        >     使用该参数进行模型训练，得到模型表现
+        >
+        >     把新得到的模型表现加入高斯过程重新拟合
+        >
+        >     此时表现最好的模型对应的参数集合就是当前最优的参数集合
+        >
+    3. 例
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220326234221-f3jaybz.png)
+    4. 两种搜索方式
+
+        1. exploration：探索不确定性最大的区域
+        2. exploitation：可能最大值的周边
+    5. 如何在风控中设置目标函数
+
+        1. max 测试集KS - 0.8*（测试集KS-训练集合KS）
+        2. 也可考虑KS的最大值尽可能的靠前（高分段）【加入目标函数】
+5. 分数转换
+
+    1. 模型的直接输出记为p
+    2. 将p转换为$odd=\frac{1-p}{p}$
+    3. 使用分数转换$score=BS=PDO*\frac{ln\ odd}{ln2}$
+
+## 六、全流程模型
+
+1. 用户分群
+
+    1. 内外流量
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220327001209-zenrl47.png)
+    2. 消费度与活跃度
+
+        目标：把外部流量（高风险）—>通过促消费与促活跃—>转换为优质客群
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220327001821-ce6p191.png)
+
+        全新客实时申请->新客邀请实时申请>新客白名单
+2. 业务阶段
+
+    ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220327002127-v7wke84.png)
+3. **A卡模型**
+
+    1. 冷启动规则A卡
+
+        **场景：**新公司开放现金贷业务，开发还在搭建App和后台系统；需要风控提供相关新客审批模型，此时完全没有标签标本  
+        **需要做的工作内容：**
+
+        1. 根据策略同事的经验，选择少量对后续收集数据有用的规则
+        2. 身份校验规则要详细
+        3. 信用和反欺诈只做策略经验上证实的规则
+        4. 花时间做粗粒度客群定位
+        5. 搜刮一切能找到的黑名单
+
+            1. 网上公开搜到的身份证
+            2. 公开法院的犯罪记录
+            3. 公开逾期的老赖信息
+            4. 利用相关关系获得的测试的黑名单
+            5. 购买的外部黑名单
+
+        **忌讳：**做过于复杂的规则，会影响业务扩张
+
+        **本阶段相较于模型更为重要的工作：**
+
+        1. 搭建数据分析平台
+        2. 搭建模型训练平台
+        3. 搭建特征与模型监控系统
+        4. 参与团队的数据收集、讨论存储结构、评估数据质量、确保数据可回溯，避免未来的信息
+        5. 分析所有能用的数据源是否能完全刻画用户的信用画像
+        6. 制作特征构建计划，早日接入新数据
+        7. App数据标注、地理信息整理、样本案例分析
+        8. 管理老板的定位，使其对风控模型的定位和发展方向有正确的认知；如果老板在冷启动要做复杂的模型，emmm
+    2. 冷启动迁移A卡
+
+        1. 场景1：完全冷启动
+
+            **场景**：已经开放单期现金贷，现在要开放现金分期；现金贷有大量的样本；现金贷分期之前已经开放少量用户，只有少量样本
+
+            **需要做的工作内容：**把现金贷数据作为源域，把现金贷分期数据作为目标域，运用[tradaboost算法](https://github.com/yiqiyu/tradaboost)进行迁移学习。（分错目标域的数据TrAdaboost权重增大较多，分错源域的数据TrAdaboost权重增大较少）
+
+            **更简单粗暴的方法：**对目标域数据进行SMOTE过采样，对源域数据分组做欠采样，按分组合并数据进行模型训练
+        2. 场景2：冷启动迁移
+
+            **场景：**开拓新市场（已经开放了一个市场的现金贷，拥有大量样本；需要开拓一个新市场，获取的数据和老市场结构一样，但目前完全无标签样本）
+
+            **需要做的工作内容**：利用[JDA方法](https://github.com/jindongwang/transferlearning/tree/master/code/traditional/JDA)，完成迁移学习；把老市场数据作为源域，把新市场数据作为目标域
+
+            **原理：**找新市场数据和老市场数据接近的点做预测，计算距离使用Maximum Mean Discrepancy（MMD）
+
+            **方案2:** （非实时申请）离线白名单邀请机制：在目标域所有的输入计算与源域输入的PSI，挑出二者类似的部分在源域训练后只在类似的人群上打分邀请。——>通过特征分布相似度找好客户
+
+            **核心：**快！快！快！ 不要浪费大量时间在优化冷启动模型上，多收集样本比尝试迁移算法更有效。
+
+            结果导向、敢于试错、小步快跑、快速迭代
+    3. 离线白名单
+
+        **场景：**充分发挥存量用户和数据优势，冷启动阶段就需要特意开放优质客群获得标签；在收集3000个样本时即可构造一个在优质客群上能超越规则模型的A卡。
+
+        **问题：**电商用户量巨大，即使筛选了优质客群，量级也是非常巨大的，需要进行细分客群，才给跑得动特征构建的代码。细分维度：订单数据、支付习惯、消费习惯
+
+        **模型：**
+
+        训练：高订单->预测：高订单（包括货到付款、信贷支付、信用卡支付、电子钱包支付、借记卡支付：可进一步分群）
+
+        训练：低订单->预测：低订单、零订单
+
+        **区别：即用户行为/历史借款类特征的厚薄区别**
+    4. 白名单+实时审批
+
+        **场景：**零单用户数据较少，在白名单邀请后一段时间数据变化可能比较大，信用分会随着时间推移准确性也会迅速下降
+
+        **方案：**白名单邀请申请后在实际申请阶段再进行一次审批，二次确认信用状况
+
+        1. 离线计算：每天离线跑批前一天的信用分
+        2. 实时查询：实时计算信用分
+    5. 实时审批A卡
+
+        **场景：**实时获取数据、计算特征、计算信用分（针对全量新客）
+
+        **两种方案：**​
+
+        1. PMML模型，适用于简单的小模型
+        2. Flask API，适用于复杂的模型
+
+        **实时计算的其他环境要求：**
+
+        1. 系统监控
+        2. 日志系统
+        3. CICD
+        4. Load Balancer
+        5. Docker
+        6. 数据库
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220327180312-invqafq.png)
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220327180859-xdyy66y.png)
+4. B卡模型
+
+    **常见B卡**
+
+    * 现金贷：用户还了上一单才可以借下一单
+    * 消费贷：用户还了上一单才可以借下一单
+    * 类信用卡：用户每月出账、还款日和出账日有距离（固定账单日/非固定账单日）
+
+    1. 订单B卡  
+        ​![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419214429-4n9yoqv.png)
+
+        Q：如果处于存量用户时期，坏用户会逐渐在借款时被管制，所以随时间的推移坏客户就会相对较少，造成坏账率不均匀。
+    2. 分期订单B卡
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419214912-1km4n60.png)
+    3. 衍生订单B卡
+
+        把展期看作催收手段（C卡），看作正常情况（B卡）
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419215456-vrv4m8t.png)
+
+        **另一种方案：** 多输出分类（本质上就是建两个模型 汗）
+
+        X： 正常用户好坏样本+展期分期用户好坏样本
+
+        Y1: 是否DPD30
+
+        Y2: 展期分期是否会还
+    4. 分期类B卡标签  
+        ​![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419220748-6vvwrr8.png)
+
+        分期标签如何确定？
+    5. 循环授信B卡
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419221821-nx1x1lm.png)
+    6. 还款日月度B卡
+
+        PS：额度相关信息要谨慎使用，特别是在存量经营时代，频繁调额可能会导致额度相关特征不稳定。解决方案：额度使用率？（信用卡可以通过额度相关信息识别借新还旧、刷单等行为）
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419222842-kaw09w5.png)
+    7. 账单日月度B卡
+
+        相比还款日缺少部分信息
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419223506-ttrz8cg.png)
+    8. PS： B卡标签
+
+        一定是当前逾期状况作为标签，否则会出现穿越信息
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419221643-ugcldg5.png)
+5. C卡模型
+
+    1. 催收预警模型（日度B卡）
+    2. 催收迁徙率模型（自愈、内催、委外）
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419225158-tpsojkm.png)
+    3. 催收生存模型
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419230033-bvhpfdr.png)
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419230042-e2aqn67.png)
+
+        ![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419230051-2x959ly.png)
+    4. 失联修复模型
+
+        设备登陆账号、相同收货地址
+
+## 七、辅助模型
+
+### 1. 用户响应模型
+
+本质上就是动支模型？为了区分活跃/非活跃用户，在运营中识别出优质非活跃用户进行操作。
+
+### 2. 用户价值模型
+
+RFM模型
+
+![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419232103-0r75jug.png)
+
+### 3. 聚类算法
+
+通常是分析工具，不用做线上使用
+
+1. K-means：适用于数据规模比较大
+
+    如何选择K？
+
+    [Unsurpervised Learning of Finite Mixture Models](https://github.com/abriosi/gmm-mml)
+2. GMM：先验分布是高斯分布的贝叶斯版K-means
+3. DBSCAN：在特征的scale都差不多的情况下，比较好使用基于密度的聚类算法（GPS）
+
+### 4. 异常点检测
+
+Isolation Forest 1:N的Random forest
+
+SC SVM 1:N 的SVM
+
+1NN 1:N KNN 结构是voronoi
+
+### 5. TFIDF特征
+
+AppList：onehot会导致维度过大；label encoding没有足够的数据支持，label会很不稳定
+
+此时需要对有区分度的App更加关注（普遍意义+区分度）->（频率+坏账【好用户作为一个doc，坏用户作为一个doc】）
+
+![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419234143-42gyz02.png)
+
+### 6. Geohash和GeoJson
+
+二维类别作为一维字符（可以对区域进行特征衍生）
+
+![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419234703-mqiczei.png)
+
+地理信息存储格式
+
+![image.png](https://assets.b3logfile.com/siyuan/1617901637880/assets/image-20220419234907-8sjtdzb.png)
+
+### 7. 地理位置回归模型
+
+评估地理位置信息的不确定度
+
+高斯过程
+
+### 8. 主题模型/文本分类/Embedding特征
+
+Topic Model/Text CNN。Embedding
+
+### 11. 关系网络分析
+
+Page Ranking
